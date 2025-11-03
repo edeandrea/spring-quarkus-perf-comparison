@@ -3,7 +3,7 @@
 This is the main entrypoint for running benchmarks.
 
 > [!IMPORTANT]
-> Please read the [Running performance comparisons documentation](../README.md#running-performance-comparisons)!!! This is super important to understand how benchmarks work!
+> Please read the [Running performance comparisons documentation](../../README.md#running-performance-comparisons)!!! This is super important to understand how benchmarks work!
 
 Now that you've read that (if you haven't, please go do so now) here's the details on how to run on a single machine, with solid automation and detailed reporting.
 
