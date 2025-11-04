@@ -132,13 +132,13 @@ setup_jbang() {
     JBANG_CMD="jbang"
   else
     echo "jbang not found locally. Using jbang wrapper..."
-
+    
     # Download the jbang wrapper if it doesn't exist
     if [ ! -f ".jbang-wrapper" ]; then
-
+      curl -Ls https://sh.jbang.dev -o .jbang-wrapper
       chmod +x .jbang-wrapper
     fi
-
+    
     JBANG_CMD="./.jbang-wrapper"
     echo "Using jbang wrapper"
   fi
