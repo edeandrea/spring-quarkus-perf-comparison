@@ -57,13 +57,9 @@ push_results() {
   # Copy over the results into a new directory named with the current date/time
   mkdir -p ${resultsDir}
 
-  echo "RUN_RESULTS_DIR:"
-  tree ${RUN_RESULTS_DIR}
-
   cp -vR ${RUN_RESULTS_DIR}/ ${resultsDir}/
   
-  echo "resultsDir (${resultsDir}):"
-  tree ${resultsDir}
+  echo "resultsDir (${resultsDir})"
 
   # Strip out the .env section of the json
   jq 'del(.env)' ${resultsDir}/metrics.json > ${resultsDir}/metrics.json.tmp && \
