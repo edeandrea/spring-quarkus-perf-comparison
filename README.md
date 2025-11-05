@@ -11,7 +11,13 @@ This project contains the following modules:
  
 ## Building
 
-`./mvnw clean verify`
+Each module can be built using 
+
+```sh
+./mvnw clean verify
+```
+
+You can also run `./mvnw clean verify` at the project root to build all modules. 
 
 ## Application requirements/dependencies
              
