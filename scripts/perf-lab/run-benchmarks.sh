@@ -317,5 +317,6 @@ while getopts "a:b:c:de:f:g:h:i:j:l:m:n:o:p:q:r:s:t:u:v:w:x:" option; do
 done
 
 validate_values
+print_values
 setup_jbang
-run_benchmarks
+# run_benchmarks
