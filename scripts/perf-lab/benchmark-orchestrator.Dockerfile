@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi
+FROM --platform=$TARGETPLATFORM registry.access.redhat.com/ubi9/ubi
 LABEL org.opencontainers.image.source="https://github.com/quarkusio/spring-quarkus-perf-comparison"
 
 USER root
