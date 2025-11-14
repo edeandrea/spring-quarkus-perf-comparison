@@ -13,7 +13,7 @@ RUN useradd -r -u 1000 -g wheel -s /bin/bash benchmark
 RUN echo "benchmark ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Install homebrew
-RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+# RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 USER benchmark
 WORKDIR /home/benchmark
@@ -33,10 +33,10 @@ RUN curl -s "https://get.sdkman.io" | bash && \
     source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Configure homebrew
-ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew \
-	HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar \
-	HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew \
-	PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
+# ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew \
+# 	HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar \
+# 	HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew \
+# 	PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
 
 RUN	echo "eval \$(${HOMEBREW_PREFIX}/bin/brew shellenv)" >> ~/.bashrc
 
