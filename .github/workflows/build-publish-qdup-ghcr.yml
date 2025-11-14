@@ -47,7 +47,7 @@ jobs:
       - name: Build and push images
         uses: docker/build-push-action@v6
         with:
-          file: benchmark-orchestrator.Dockerfile
+          file: scripts/perf-lab/benchmark-orchestrator.Dockerfile
           context: scripts/perf-lab
           platforms: linux/amd64,linux/arm64
           push: true
