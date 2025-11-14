@@ -12,6 +12,9 @@ RUN useradd -r -u 1000 -g wheel -s /bin/bash benchmark
 # Allow benchmark user to use sudo without password
 RUN echo "benchmark ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+# Install homebrew
+RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
+
 USER benchmark
 WORKDIR /home/benchmark
 
@@ -28,10 +31,6 @@ RUN curl -Ls https://sh.jbang.dev | bash -s - app setup
 # Install sdkman
 RUN curl -s "https://get.sdkman.io" | bash && \
     source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-
-# Install homebrew
-RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
 
 # Configure homebrew
 ENV HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew \
