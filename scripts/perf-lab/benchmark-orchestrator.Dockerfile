@@ -16,7 +16,8 @@ RUN touch /etc/subuid /etc/subgid && \
 RUN useradd -u 1000 -g wheel -s /bin/bash benchmark
 
 # Allow benchmark user to use sudo without password
-RUN echo "benchmark ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN echo "benchmark ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/benchmark && \
+    chmod 0440 /etc/sudoers.d/benchmark
 
 # Install homebrew
 # RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash
