@@ -21,12 +21,7 @@ exit_abnormal() {
 start_postgres() {
   echo "Starting PostgreSQL database '${DB_CONTAINER_NAME}'"
 
-  local image="postgres:17"
-
-  if [[ "$engine" == "podman" ]]; then
-    local image="docker.io/${image}"
-  fi
-
+  local image="quay.io/rhappsvcs/postgres:17"
   local pid=$(${engine} run \
     --cpus 2 \
     --memory 2g \
