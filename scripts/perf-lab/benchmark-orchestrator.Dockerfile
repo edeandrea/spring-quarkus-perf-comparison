@@ -3,11 +3,17 @@ LABEL org.opencontainers.image.source="https://github.com/quarkusio/spring-quark
 
 USER root
 
-# Install system dependencies
-RUN dnf install -y --allowerasing gcc zlib-devel git procps-ng curl file bash unzip zip sudo
+# Install system dependencies and container runtime
+RUN dnf install -y --allowerasing gcc zlib-devel git procps-ng curl file bash unzip zip sudo podman fuse-overlayfs slirp4netns shadow-utils
+
+# Set up subuid and subgid for rootless containers BEFORE creating user
+RUN touch /etc/subuid /etc/subgid && \
+    chmod 644 /etc/subuid /etc/subgid && \
+    echo "benchmark:100000:65536" >> /etc/subuid && \
+    echo "benchmark:100000:65536" >> /etc/subgid
 
 # Add a new non-root user
-RUN useradd -r -u 1000 -g wheel -s /bin/bash benchmark
+RUN useradd -u 1000 -g wheel -s /bin/bash benchmark
 
 # Allow benchmark user to use sudo without password
 RUN echo "benchmark ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -37,8 +43,8 @@ RUN curl -s "https://get.sdkman.io" | bash && \
 # 	HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar \
 # 	HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew \
 # 	PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
-
-RUN	echo "eval \$(${HOMEBREW_PREFIX}/bin/brew shellenv)" >> ~/.bashrc
+#
+#RUN	echo "eval \$(${HOMEBREW_PREFIX}/bin/brew shellenv)" >> ~/.bashrc
 
 # Keep container running and wait for connections
 CMD ["tail", "-f", "/dev/null"]
