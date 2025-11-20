@@ -6,8 +6,6 @@ on:
       - '**/*.md'
       - '**/images/**'
       - '.github/dependabot.yml'
-      - '.github/workflows/main.yml'
-      - 'scripts/**'
     branches:
       - main
   pull_request:
@@ -22,8 +20,6 @@ on:
       - '**/*.md'
       - '**/images/**'
       - '.github/dependabot.yml'
-      - '.github/workflows/main.yml'
-      - 'scripts/**'
   workflow_dispatch:
 
 concurrency:
