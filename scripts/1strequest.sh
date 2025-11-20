@@ -13,6 +13,8 @@
 # 3) Run the Quarkus with spring compatibility app 10 times
 # $ ./1strequest.sh "java -XX:ActiveProcessorCount=8 -Xms512m -Xmx512m -jar ../quarkus3-spring-compatibility/target/quarkus-app/quarkus-run.jar" 10
 
+thisdir=`dirname "$0"`
+
 COMMAND=$1
 NUM_ITERATIONS=1
 TOTAL_RSS=0
@@ -36,7 +38,7 @@ do
   sync && sudo purge
 
   # Start the infra
-  ./infra.sh -s
+  ${thisdir}/infra.sh -s
 
   ts=$(_date)
   $COMMAND &
@@ -62,7 +64,7 @@ do
   echo "-------------------------------------------------"
 
   # Stop the infra
-  ./infra.sh -d
+  ${thisdir}/infra.sh -d
 done
 
 echo

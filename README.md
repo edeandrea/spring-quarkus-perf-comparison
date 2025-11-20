@@ -47,8 +47,6 @@ cd scripts
 ## Scripts
 
 There are some [scripts](scripts) available to help you run the application:
-- [`1strequest.sh`](scripts/1strequest.sh)
-    - Runs an application X times and computes the time to 1st request and RSS for each iteration as well as an average over the X iterations.
 - [`run-requests.sh`](scripts/run-requests.sh)
     - Runs a set of requests against a running application.
 - [`infra.sh`](scripts/infra.sh)
@@ -78,6 +76,11 @@ We use [Hyperfoil](https://hyperfoil.io/https://hyperfoil.io/) instead of [wrk](
 
 You can run these in any order. 
 
+#### Throughput 
+
+The [`stress.sh`](scripts/stress.sh) script starts the infrastructure, and uses a load generator to measure
+how many requests the applications can handle over a short period of time. 
+
 ```shell
 scripts/stress.sh quarkus3/target/quarkus-app/quarkus-run.jar
 scripts/stress.sh quarkus3-spring-compatibility/target/quarkus-app/quarkus-run.jar
@@ -91,6 +94,28 @@ For each test, you should see output like
     Latency     9.58ms    6.03ms  94.90ms   85.57%
     Req/Sec   9936.90   2222.61  10593.00     95.24
 ```
+
+#### RSS and time to first request 
+
+
+The [`1strequest.sh`](scripts/1strequest.sh) starts the infrastructure and runs an application X times and computes the time to 1st request and RSS for each iteration as well as an average over the X iterations.
+
+For example, 
+```shell
+scripts/1strequest.sh "java -XX:ActiveProcessorCount=8 -Xms512m -Xmx512m -jar quarkus3/target/quarkus-app/quarkus-run.jar" 5
+scripts/1strequest.sh "java -XX:ActiveProcessorCount=8 -Xms512m -Xmx512m -jar quarkus3-spring-compatibility/target/quarkus-app/quarkus-run.jar" 5
+scripts/1strequest.sh "java -XX:ActiveProcessorCount=8 -Xms512m -Xmx512m -jar springboot3/target/springboot3.jar" 5
+```
+
+You should see output like 
+
+```shell
+-------------------------------------------------
+AVG RSS (after 1st request): 35.2 MB
+AVG time to first request: 0.150 sec
+-------------------------------------------------
+```
+
 ### Acceptable: Run on a single machine, with solid automation and detailed output
 
 These scripts are being developed.

@@ -6,8 +6,6 @@ on:
       - '**/*.md'
       - '**/images/**'
       - '.github/dependabot.yml'
-      - '.github/workflows/main.yml'
-      - 'scripts/**'
     branches:
       - main
   pull_request:
@@ -22,8 +20,6 @@ on:
       - '**/*.md'
       - '**/images/**'
       - '.github/dependabot.yml'
-      - '.github/workflows/main.yml'
-      - 'scripts/**'
   workflow_dispatch:
 
 concurrency:
@@ -64,3 +60,26 @@ jobs:
           ./mvnw -B clean verify \
             -Dmaven.compiler.release=${{ matrix.java }} \
             -Djava.version=${{ matrix.java }}
+
+      - name: Setup JBang
+        uses: jbangdev/setup-jbang@main
+
+      - name: Validate simple scripts
+        run: |
+          case "${{ matrix.app }}" in
+            springboot3)
+            TARGET_DIR="${{ matrix.app }}/target/springboot3.jar"
+            ;;
+            quarkus3)
+            TARGET_DIR="${{ matrix.app }}/target/quarkus-app/quarkus-run.jar"
+            ;;
+            quarkus3-spring-compatibility)
+            TARGET_DIR="${{ matrix.app }}/target/quarkus-app/quarkus-run.jar"
+            ;;
+            *)
+            echo "Unknown app: ${{ matrix.app }}"
+            exit 1
+            ;;
+          esac
+          scripts/stress.sh "$TARGET_DIR"
+          scripts/1strequest.sh "java -XX:ActiveProcessorCount=8 -Xms512m -Xmx512m -jar $TARGET_DIR" 5
