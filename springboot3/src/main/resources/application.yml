@@ -3,10 +3,10 @@ spring:
     username: fruits
     password: fruits
     url: jdbc:postgresql://localhost:5432/fruits
-    defer-datasource-initialization: true
   jackson:
     default-property-inclusion: non_empty
   jpa:
+    defer-datasource-initialization: true
     properties:
       hibernate:
         cache:
