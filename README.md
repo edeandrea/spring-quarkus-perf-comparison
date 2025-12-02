@@ -4,6 +4,8 @@ Performance comparison between Spring Boot and Quarkus
 This project contains the following modules:
 - [springboot3](springboot3)
     - A Spring Boot 3.x version of the application
+- [springboot4](springboot4)
+    - A Spring Boot 4.x version of the application 
 - [quarkus3](quarkus3)
     - A Quarkus 3.x version of the application
 - [quarkus3-spring-compatibility](quarkus3-spring-compatibility)
