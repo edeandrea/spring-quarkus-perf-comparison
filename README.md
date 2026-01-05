@@ -1,6 +1,20 @@
 # spring-quarkus-perf-comparison
-Performance comparison between Spring Boot and Quarkus
 
+This application is designed to allow like-for-like performance comparisons between Spring Boot and Quarkus.
+
+## Guiding principles 
+
+Designing good benchmarks is hard! There are lots of trade-offs, and lots of "right" answers. 
+Here are the principles we used when making implementation choices:
+
+  - **Parity**. The application code in the Spring and Quarkus versions of the application should be strictly equivalent, and the domain models should be identical. Performance differences should come from architecture differences and library-integration optimisations in the frameworks themselves.
+  - **Normal-ness**. Realism is more important than squeezing out every last bit of performance. We wanted to measure the "out of the box" performance experience. That means the use of tuning knobs are kept to a minimum. This is different from the goals for a benchmark like [TechEmpower](https://www.techempower.com/benchmarks/#section=data-r23), where the tuning aim is to get the highest absolute performance numbers.
+  - **High quality**. Applications should model best practices. Although we want the application to be represent a typical usage, someone who copies it shouldn't ever be copying 'wrong' or bad code. 
+  - **Easy to try at home**. Running measurements should be easy for a non-expert to do with a minimum of infrastructure setup, and it should also be rigorous in terms of performance best practices. These two goals are contradictory, unfortunately! To try and achieve both, we have two versions of the scripts, one optimised for simplicity, and one for methodological soundness.
+
+
+
+## What's in the repo
 This project contains the following modules:
 - [springboot3](springboot3)
     - A Spring Boot 3.x version of the application
