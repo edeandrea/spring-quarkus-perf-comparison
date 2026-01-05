@@ -1,0 +1,55 @@
+# =============================================================================
+# Hyperfoil Load Test Configuration
+# =============================================================================
+#
+# This configuration file defines a load test scenario for the application
+# endpoint. It includes a warmup phase followed by a main load test phase,
+# both targeting the same HTTP endpoint.
+#
+# Configurable Parameters:
+# ----------------------------------
+# PROTOCOL           - HTTP protocol to use (default: http)
+#                       Options: http, https
+# HOST              - Target server hostname (default: localhost)
+# PORT              - Target server port (default: 8080)
+# SHARED_CONNECTIONS - Number of shared HTTP connections in the pool (default: 100)
+# PATH              - HTTP endpoint path to test (default: /fruits)
+# WARMUP_USERS      - Number of concurrent users during warmup phase (default: 2)
+# WARMUP_DURATION   - Duration of the warmup phase (default: 2m)
+# LOAD_USERS        - Number of concurrent users during main load test (default: 2)
+# LOAD_DURATION     - Duration of the main load test phase (default: 30s)
+#
+# Usage:
+# ------
+# Override parameters using: -P PARAM_NAME=value
+# Example: jbang run@hyperfoil -PHOST=example.com -PPORT=443 -PPROTOCOL=https app-load-test.hf.yml
+#
+# =============================================================================
+
+name: app-load-test
+http:
+  - protocol: !param PROTOCOL http
+    host: !param HOST localhost
+    port: !param PORT 8080
+    sharedConnections: !param SHARED_CONNECTIONS 100
+
+phases:
+  - loadTest:
+      always:
+        users: !param LOAD_USERS 50
+        duration: !param LOAD_DURATION 30s
+        startAfter: warmup
+        scenario:
+          - loadTest: &loadTest
+              - httpRequest:
+                  GET: !param PATH /fruits
+                  headers:
+                    accept: application/json
+
+  - warmup:
+      always:
+        users: !param WARMUP_USERS 50
+        duration: !param WARMUP_DURATION 2m
+        scenario:
+          - loadTest: *loadTest
+
