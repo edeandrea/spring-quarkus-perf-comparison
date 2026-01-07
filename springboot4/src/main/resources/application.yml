@@ -3,15 +3,36 @@ spring:
     username: fruits
     password: fruits
     url: jdbc:postgresql://localhost:5432/fruits
+    hikari:
+      maximum-pool-size: 20
   jackson:
     default-property-inclusion: non_empty
   jpa:
     defer-datasource-initialization: true
     properties:
       hibernate:
+        default_batch_fetch_size: 16
         cache:
           # 1. Enable Hibernate's L2 Caching
           use_second_level_cache: true
           # 2. Configure the cache region factory (specifies the JCache/Caffeine provider)
           region:
             factory_class: jcache
+
+logging:
+  level:
+    org.apache.tomcat: DEBUG
+    org.apache.catalina: DEBUG
+
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+    threads:
+      max: 20
+      min-spare: 20
+#    max-connections: 20
+    accept-count: 400
+    keep-alive-timeout: 60000
+    max-keep-alive-requests: 10000
+    connection-timeout: 30s
