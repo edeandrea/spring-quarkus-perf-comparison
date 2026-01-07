@@ -19,18 +19,18 @@ spring:
           region:
             factory_class: jcache
 
-logging:
-  level:
-    org.apache.tomcat: DEBUG
-    org.apache.catalina: DEBUG
-
+#logging:
+#  level:
+#    org.apache.tomcat: DEBUG
+#    org.apache.catalina: DEBUG
+#
 server:
   tomcat:
-    accesslog:
-      enabled: true
-    threads:
-      max: 20
-      min-spare: 20
+#    accesslog:
+#      enabled: true
+#    threads:
+#      max: 20
+#      min-spare: 20
 #    max-connections: 20
     accept-count: 400
     keep-alive-timeout: 60000
