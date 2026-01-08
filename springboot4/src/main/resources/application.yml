@@ -32,7 +32,7 @@ server:
 #      max: 20
 #      min-spare: 20
 #    max-connections: 20
-    accept-count: 400
-    keep-alive-timeout: 60000
-    max-keep-alive-requests: 10000
-    connection-timeout: 30s
+#    accept-count: 400
+#    keep-alive-timeout: -1
+    max-keep-alive-requests: -1
+#    connection-timeout: 30s
