@@ -28,11 +28,11 @@ server:
   tomcat:
 #    accesslog:
 #      enabled: true
-#    threads:
-#      max: 20
+    threads:
+      max: 20
 #      min-spare: 20
 #    max-connections: 20
 #    accept-count: 400
-#    keep-alive-timeout: -1
+#    keep-alive-timeout: 30m
     max-keep-alive-requests: -1
 #    connection-timeout: 30s
