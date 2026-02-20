@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 1st argument is the command to execute
 # 2nd argument is the number of iterations. If not specified defaults to 1
@@ -35,7 +35,12 @@ fi
 for (( i=0; i<$NUM_ITERATIONS; i++))
 do
   # drop OS page cache entries, inode etc etc
-  sync && sudo purge
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sync && sudo purge
+  else
+    # Linux: drop pagecache, dentries and inodes
+    sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+  fi
 
   # Start the infra
   ${thisdir}/infra.sh -s
