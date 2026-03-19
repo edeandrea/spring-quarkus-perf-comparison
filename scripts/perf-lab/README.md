@@ -179,21 +179,20 @@ Looking at the `lscpu -e` output, this is a 2-socket system with hyperthreading 
 
 **Recommended allocation** (using whole physical cores, avoiding hyperthreading siblings across workloads):
 
-| Workload                      | CPUs       | Physical Cores | NUMA Node |
-|-------------------------------|------------|----------------|-----------|
-| Application (4 CPUs)          | `0,2,4,6`  | cores 0,2,4,6  | Socket 0  |
-| Database (3 CPUs)             | `8,10,12`  | cores 8,10,12  | Socket 0  |
-| OTel stack (3 CPUs)           | `14,16,18` | cores 14,16,18 | Socket 0  |
-| Load generator (3 CPUs)       | `1,3,5`    | cores 1,3,5    | Socket 1  |
-| System monitor (1 CPU)        | `7`        | core 7         | Socket 0  |
-| Time-to-first-request (1 CPU) | `9`        | core 9         | Socket 1  |
+| Workload                      | CPUs       | NUMA Node |
+|-------------------------------|------------|-----------|
+| Application (4 CPUs)          | `2,4,6,8`  | Socket 0  |
+| Database (3 CPUs)             | `10,12,14` | Socket 0  |
+| OTel stack (3 CPUs)           | `16,18,20` | Socket 0  |
+| Load generator (3 CPUs)       | `22,24,26` | Socket 0  |
+| System monitor (1 CPU)        | `28`       | Socket 0  |
+| Time-to-first-request (1 CPU) | `30`       | Socket 0  |
 
 **Rationale:**
+- All workloads are on Socket 0 (same NUMA node).
+- Leave CPU 0 (and its sibling 32) entirely free for the OS and IRQ handling. All 15 remaining Socket 0 physical cores cover the workload exactly.
 - The **application** gets Socket 0 cores to benefit from shared L3 cache with the **database** (also Socket 0) — this minimizes cross-NUMA latency for DB calls.
-- The **OTel stack** stays on Socket 0 too, close to the app that generates telemetry data.
-- The **load generator** is isolated on Socket 1 so it doesn't compete for L3 cache or memory bandwidth with the app/DB.
-- The **time-to-first-request** measurement goes on Socket 1 to avoid disturbing app startup.
-- The **system monitor** gets a spare Socket 0 core (core 7) — lightweight enough that it won't meaningfully impact neighbors.
+- The **OTel stack** and **database** stay on Socket 0 too, close to the app that generates telemetry data.
 - **No hyperthreading siblings are shared** between workloads, eliminating contention on shared execution units, L1/L2 caches.
 
 This approach uses 15 out of 32 physical cores (no hyperthreading), leaving the remaining cores free for the OS and other system processes. This is also why the defaults are set the way they are
