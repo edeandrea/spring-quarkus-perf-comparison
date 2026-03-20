@@ -210,7 +210,7 @@ Even/odd CPU index → Socket 0 / Socket 1
 - The time to first request (TTFR) workload can share one of the same CPUs as the load generator because those two tests never run at the same time.
 - **No hyperthreading siblings are shared** between workloads, eliminating contention on shared execution units, L1/L2 caches.
 
-This approach uses 15 out of 32 physical cores (no hyperthreading), leaving the remaining cores free for the OS and other system processes. This is also why the defaults are set the way they are
+This approach uses 14 out of 32 physical cores (no hyperthreading), leaving the remaining cores free for the OS and other system processes. This is also why the defaults are set the way they are
 
 ### Available Runtimes
 
