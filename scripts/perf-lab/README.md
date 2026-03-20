@@ -169,11 +169,25 @@ CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE    MAXMHZ    MINMHZ       MHZ
  63    1      1   31 28:28:28:1       yes 3900.0000 1000.0000 3900.0000
 ```
 
-Looking at the `lscpu -e` output, this is a 2-socket system with hyperthreading enabled:
-- 32 physical cores (16 per socket/NUMA node)
-- 64 logical CPUs (each physical core has 2 siblings: CPU `N` and CPU `N+32`)
-- Socket 0 (NODE 0): even-indexed CPUs 0,2,4,...,30 + their hyperthreading siblings 32,34,...,62
-- Socket 1 (NODE 1): odd-indexed CPUs 1,3,5,...,31 + their hyperthreading siblings 33,35,...,63
+We can make some assumptions from looking at the `lscpu -e` output:
+
+The system has `64` logical CPUs total
+- The table has 64 rows (CPU 0 through CPU 63), one per logical CPU.
+
+There are `2` sockets / `2` NUMA nodes
+- The `SOCKET` column contains only values `0` and `1`, and the `NODE` column mirrors it exactly 
+- There are 2 physical sockets, each corresponding to one NUMA node
+
+There are `32` physical cores (`16` per socket)
+- The CORE column lists values 0–31, but each value appears exactly twice across the full table.
+- That repetition is the hyperthreading signature: one physical core → two logical CPUs.
+    - 64 logical CPUs ÷ 2 = 32 physical cores, split evenly as 16 per socket.
+
+Hyperthreading sibling pairing (N and N+32)
+- CPUs `0–31` and CPUs `32–63` share identical `CORE` and cache (L1d:L1i:L2:L3) values in pairs (e.g., CPU 0 and CPU 32 both map to CORE 0 with cache set 0:0:0:0), confirming the sibling relationship.
+
+Even/odd CPU index → Socket 0 / Socket 1
+- Looking at the `SOCKET` column, even-indexed CPUs (0, 2, 4, …, 30 and their siblings 32, 34, …, 62) all belong to Socket 0, while odd-indexed CPUs (1, 3, 5, …, 31 and siblings 33, 35, …, 63) belong to Socket 1.
 
 **Key principle:** Avoid sharing physical cores between workloads (no hyperthreading siblings across workload boundaries), and keep workloads on the same NUMA node when possible.
 
@@ -186,13 +200,14 @@ Looking at the `lscpu -e` output, this is a 2-socket system with hyperthreading 
 | OTel stack (3 CPUs)           | `16,18,20` | Socket 0  |
 | Load generator (3 CPUs)       | `22,24,26` | Socket 0  |
 | System monitor (1 CPU)        | `28`       | Socket 0  |
-| Time-to-first-request (1 CPU) | `30`       | Socket 0  |
+| Time-to-first-request (1 CPU) | `22`       | Socket 0  |
 
 **Rationale:**
 - All workloads are on Socket 0 (same NUMA node).
 - Leave CPU 0 (and its sibling 32) entirely free for the OS and IRQ handling. All 15 remaining Socket 0 physical cores cover the workload exactly.
 - The **application** gets Socket 0 cores to benefit from shared L3 cache with the **database** (also Socket 0) — this minimizes cross-NUMA latency for DB calls.
 - The **OTel stack** and **database** stay on Socket 0 too, close to the app that generates telemetry data.
+- The time to first request (TTFR) workload can share one of the same CPUs as the load generator because those two tests never run at the same time.
 - **No hyperthreading siblings are shared** between workloads, eliminating contention on shared execution units, L1/L2 caches.
 
 This approach uses 15 out of 32 physical cores (no hyperthreading), leaving the remaining cores free for the OS and other system processes. This is also why the defaults are set the way they are

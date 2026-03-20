@@ -8,13 +8,14 @@ help() {
   echo "  - jbang (https://www.jbang.dev/download)"
   echo "  - jq (https://stedolan.github.io/jq)"
   echo
-  echo "IMPORTANT: You need to have enough cpus in order to run this script. We recommend 15 cpus minimum allocated as follows:"
+  echo "IMPORTANT: You need to have enough cpus in order to run this script. We recommend 14 cpus minimum allocated as follows:"
   echo "  - 4 CPUs for the application"
   echo "  - 3 CPUs for PostgreSQL"
   echo "  - 3 CPUs for the OpenTelemetry stack"
   echo "  - 3 CPUs for the load generator"
   echo "  - 1 CPU for monitoring the system during test execution"
   echo "  - 1 CPU for the time to first request measurement"
+  echo "      NOTE: This CPU can share one of the cpus from the load generator, since the TTFR & load measurements are not done at the same time."
   echo
   echo "Using a tool like 'lscpu -e' can help you understand how many CPUs you have available and how best to allocate them."
   echo "  - Its important to avoid sharing physical cores between workloads and keep workloads on the same NUMA node when possible."
@@ -27,7 +28,7 @@ help() {
   echo "                                                              Default: ${CPUS_APP}"
   echo "  --cpus-db <CPUS_DB>                                     CPU list for the database (e.g. 8,10,12)"
   echo "                                                              Default: ${CPUS_DB}"
-  echo "  --cpus-first-request <CPUS_FIRST_REQUEST>               CPU for time-to-first-request measurement (e.g. 9)"
+  echo "  --cpus-first-request <CPUS_FIRST_REQUEST>               CPU for time-to-first-request measurement (e.g. 1)"
   echo "                                                              Default: ${CPUS_FIRST_REQUEST}"
   echo "  --cpus-load-gen <CPUS_LOAD_GEN>                         CPU list for the load generator (e.g. 1,3,5)"
   echo "                                                              Default: ${CPUS_LOAD_GEN}"
@@ -256,12 +257,12 @@ ${JBANG_CMD} io.hyperfoil.tools:qDup:0.10.8 \
 }
 
 # Define defaults
-CPUS_APP="0,2,4,6"
-CPUS_DB="8,10,12"
-CPUS_OTEL="14,16,18"
-CPUS_LOAD_GEN="1,3,5"
-CPUS_MONITORING="7"
-CPUS_FIRST_REQUEST="9"
+CPUS_APP="0,1,2,3"
+CPUS_DB="4,5,6"
+CPUS_OTEL="7,8,9"
+CPUS_LOAD_GEN="10,11,12"
+CPUS_MONITORING="13"
+CPUS_FIRST_REQUEST="10"
 DESCRIPTION=""
 SCM_REPO_URL="https://github.com/quarkusio/spring-quarkus-perf-comparison.git"
 SCM_REPO_BRANCH="main"
