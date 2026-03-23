@@ -88,7 +88,7 @@ The script also has 3 dependencies that need to be resolved before it can be run
 
 ### Proper CPU affinity
 
-Proper CPU pinning is important for the performance of the benchmark to ensure proper isolation of the workloads.
+Proper CPU affinity is important for the performance of the benchmark to ensure proper isolation of the workloads.
 
 You need to have enough cpus in order to run this script. We recommend 15 cpus minimum allocated as follows:
 - 4 CPUs for the application
