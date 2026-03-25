@@ -129,4 +129,4 @@ jobs:
         working-directory: ${{ matrix.app.dir }}
         run: |
           ../scripts/stress.sh "${{ matrix.app.app-jar }}"
-          ../scripts/1strequest.sh "java -XX:ActiveProcessorCount=4 -Xms512m -Xmx512m ${{ matrix.app.run-args }} -jar ${{ matrix.app.app-jar }}" 5
+          ../scripts/1strequest.sh "java -XX:ActiveProcessorCount=4 -Xms512m -Xmx512m ${{ matrix.app.run-args }} -jar ${{ matrix.app.app-jar }}" 3
