@@ -116,8 +116,8 @@ jobs:
             -Djava.version=${{ matrix.java }}
           
           # Training run
-          java -Djarmode=tools -jar ${{ matrix.app.app-jar }} extract --destination=target/aot-app
-          java -XX:AOTCacheOutput=target/app.aot -Dspring.context.exit=onRefresh -jar ${{ matrix.app.app-jar }}
+          java -Djarmode=tools -jar ${{ matrix.app.app-jar }} extract --destination target/aot-app && \
+            java -XX:AOTCacheOutput=target/app.aot -Dspring.context.exit=onRefresh -jar ${{ matrix.app.app-jar }}
           
           # Stop the services
           ../scripts/infra.sh -d
