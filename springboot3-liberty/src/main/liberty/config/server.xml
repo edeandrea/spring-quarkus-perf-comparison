@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Spring Boot 3 on OpenLiberty">
+    <featureManager>
+        <feature>springBoot-3.0</feature>
+        <feature>servlet-6.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="8080" />
+
+    <httpOptions maxKeepAliveRequests="-1" />
+
+    <springBootApplication id="springboot3-liberty"
+                           location="thin-springboot3-liberty-1.0.jar"
+                           name="springboot3-liberty" />
+</server>

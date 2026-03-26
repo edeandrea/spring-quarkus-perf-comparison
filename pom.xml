@@ -13,6 +13,8 @@
 	      <module>quarkus3-virtual</module>
         <module>quarkus3-spring-compatibility</module>
         <module>springboot3</module>
+        <module>springboot3-liberty</module>
         <module>springboot4</module>
+        <module>springboot4-liberty</module>
     </modules>
 </project>

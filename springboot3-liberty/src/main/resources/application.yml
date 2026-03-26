@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: springboot3-liberty
+  datasource:
+    username: fruits
+    password: fruits
+    url: jdbc:postgresql://localhost:5432/fruits
+    hikari:
+      # @simasch: Sets the jdbc pool size to be the same that Quarkus uses
+      # see https://github.com/quarkusio/spring-quarkus-perf-comparison/pull/114
+      maximum-pool-size: 50
+  jackson:
+    default-property-inclusion: non_empty
+  jpa:
+    defer-datasource-initialization: true
+    # @simasch: Remove the open-session-in-view setting
+    # see https://github.com/quarkusio/spring-quarkus-perf-comparison/issues/108
+    # and https://github.com/quarkusio/spring-quarkus-perf-comparison/pull/124
+    open-in-view: false
+    properties:
+      hibernate:
+        cache:
+          # 1. Enable Hibernate's L2 Caching
+          use_second_level_cache: true
+          # 2. Configure the cache region factory (specifies the JCache/Caffeine provider)
+          region:
+            factory_class: jcache
+        # @simasch: Sets the hibernate batch size to be the same that Quarkus uses
+        # see https://github.com/quarkusio/spring-quarkus-perf-comparison/pull/114
+        default_batch_fetch_size: 16
+
+otel:
+  traces:
+    "sampler": traceidratio
+    "sampler.arg": 0.1
+
+# Turn on prometheus actuator endpoint
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus

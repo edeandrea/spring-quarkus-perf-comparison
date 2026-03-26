@@ -152,6 +152,14 @@ states:
       buildCmd: "${{APP_CMD_PREFIX}} ./mvnw clean -Pnative -DskipTests native:compile package ${{config.springboot3.native_build_options}}"
       runCmd: "${{APP_CMD_PREFIX}} ${{SPRING3_BOOT_DIR}}/target/springboot3 ${{config.jvm.memory}}"
       logFileStartedRegex: ".*Started SpringBoot3Application in.+seconds.*"
+    - name: spring3-liberty
+      type: jvm
+      dir: ${{SPRING3_LIBERTY_DIR}}
+      updateScript: update-spring-boot-version
+      updateVersion: ${{config.springboot3.version}}
+      buildCmd: "${{APP_CMD_PREFIX}} ./mvnw clean package -DskipTests"
+      runCmd: "${{BASE_JAVA_CMD}} -jar ${{SPRING3_LIBERTY_DIR}}/target/springboot3-liberty.jar"
+      logFileStartedRegex: ".*The defaultServer server started in .+seconds.*"
     - name: spring4-jvm
       type: jvm
       dir: ${{SPRING4_BOOT_DIR}}
@@ -200,6 +208,14 @@ states:
       buildCmd: "${{APP_CMD_PREFIX}} ./mvnw clean -Pnative -DskipTests native:compile package ${{config.springboot4.native_build_options}}"
       runCmd: "${{APP_CMD_PREFIX}} ${{SPRING4_BOOT_DIR}}/target/springboot4 ${{config.jvm.memory}}"
       logFileStartedRegex: ".*Started SpringBoot4Application in.+seconds.*"
+    - name: spring4-liberty
+      type: jvm
+      dir: ${{SPRING4_LIBERTY_DIR}}
+      updateScript: update-spring-boot-version
+      updateVersion: ${{config.springboot4.version}}
+      buildCmd: "${{APP_CMD_PREFIX}} ./mvnw clean package -DskipTests"
+      runCmd: "${{BASE_JAVA_CMD}} -jar ${{SPRING4_LIBERTY_DIR}}/target/springboot4-liberty.jar"
+      logFileStartedRegex: ".*The defaultServer server started in .+seconds.*"
 
 scripts:
   update-state:
@@ -210,7 +226,9 @@ scripts:
     - set-state: RUN.SCRIPTS_DIR ${{PROJ_REPO_DIR}}/scripts/perf-lab
     - set-state: RUN.HELPER_SCRIPTS_DIR ${{SCRIPTS_DIR}}/scripts
     - set-state: RUN.SPRING3_BOOT_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/springboot3
+    - set-state: RUN.SPRING3_LIBERTY_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/springboot3-liberty
     - set-state: RUN.SPRING4_BOOT_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/springboot4
+    - set-state: RUN.SPRING4_LIBERTY_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/springboot4-liberty
     - set-state: RUN.QUARKUS3_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/quarkus3
     - set-state: RUN.QUARKUS3_VIRTUAL_DIR ${{REPO_DIR}}/${{PROJ_REPO_NAME}}/quarkus3-virtual
     - set-state: RUN.ASYNC_PROFILER_DIR ${{BASE_DIR}}/${{ASYNC_PROFILER}}
