@@ -8,16 +8,17 @@
 #
 # Configurable Parameters:
 # ----------------------------------
-# PROTOCOL           - HTTP protocol to use (default: http)
-#                       Options: http, https
-# HOST              - Target server hostname (default: localhost)
-# PORT              - Target server port (default: 8080)
-# SHARED_CONNECTIONS - Number of shared HTTP connections in the pool (default: 100)
-# PATH              - HTTP endpoint path to test (default: /fruits)
-# WARMUP_USERS      - Number of concurrent users during warmup phase (default: 2)
-# WARMUP_DURATION   - Duration of the warmup phase (default: 2m)
-# LOAD_USERS        - Number of concurrent users during main load test (default: 2)
-# LOAD_DURATION     - Duration of the main load test phase (default: 30s)
+# PROTOCOL              - HTTP protocol to use (default: http)
+#                         Options: http, https
+# HOST                  - Target server hostname (default: localhost)
+# PORT                  - Target server port (default: 8080)
+# SHARED_CONNECTIONS    - Number of shared HTTP connections in the pool (default: 100)
+# PATH                  - HTTP endpoint path to test (default: /fruits)
+# WARMUP_USERS          - Number of concurrent users during warmup phase (default: 2)
+# WARMUP_DURATION       - Duration of the warmup phase (default: 2m)
+# WARMUP_PAUSE_DURATION - Duration of the pause between warmup and main load test (default: 30s)
+# LOAD_USERS            - Number of concurrent users during main load test (default: 2)
+# LOAD_DURATION         - Duration of the main load test phase (default: 30s)
 #
 # Usage:
 # ------
@@ -38,7 +39,7 @@ phases:
       always:
         users: !param LOAD_USERS 2
         duration: !param LOAD_DURATION 30s
-        startAfter: warmup
+        startAfter: cooldown
         scenario:
           - loadTest: &loadTest
               - httpRequest:
@@ -50,6 +51,10 @@ phases:
       always:
         users: !param WARMUP_USERS 2
         duration: !param WARMUP_DURATION 2m
+        isWarmup: true
         scenario:
           - loadTest: *loadTest
+          - cooldown:
+              - thinkTime:
+                  duration: !param WARMUP_PAUSE_DURATION 30s
 

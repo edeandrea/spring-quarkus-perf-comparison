@@ -571,10 +571,10 @@ scripts:
       then:
         - set-state:
             key: LOG_FILE
-            value: ${{REPO_DIR}}/logs/load-test-${{RUNTIMECMD.name}}-${{ITERATION}}.log
+            value: ${{REPO_DIR}}/logs/load-test-${{RUNTIME_NAME}}-${{ITERATION}}.log
         - sh: touch ${{LOG_FILE}}
-        - sh: mkdir -p ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME.name}}-${{ITERATION}}
-        - queue-download: ${{REPO_DIR}}/logs/hf-${{RUNTIME.name}}-${{ITERATION}}.log
+        - sh: mkdir -p ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}
+        - queue-download: ${{REPO_DIR}}/logs/hf-${{RUNTIME_NAME}}-${{ITERATION}}.log
         - queue-download: ${{LOG_FILE}}
         - script: start-test-services
         - script: sync-drop-fs-cache
@@ -584,8 +584,8 @@ scripts:
           then:
             - regex: "^syncjfr$"
               then:
-                - queue-download: ${{REPO_DIR}}/logs/jfr.${{RUNTIMECMD.name}}-${{ITERATION}}.jfr
-                - sh: echo "${{RUNTIMECMD.runCmd}}" | sed 's#-jar#-XX:StartFlightRecording=filename=${{REPO_DIR}}/logs/jfr.${{RUNTIMECMD.name}}-${{ITERATION}}.jfr,settings=profile,dumponexit=true -jar#'
+                - queue-download: ${{REPO_DIR}}/logs/jfr.${{RUNTIME_NAME}}-${{ITERATION}}.jfr
+                - sh: echo "${{RUNTIMECMD.runCmd}}" | sed 's#-jar#-XX:StartFlightRecording=filename=${{REPO_DIR}}/logs/jfr.${{RUNTIME_NAME}}-${{ITERATION}}.jfr,settings=profile,dumponexit=true -jar#'
                   then:
                     - set-state: SYNCJFR_RUN_CMD
                 - sh: ${{SYNCJFR_RUN_CMD}} &>${{LOG_FILE}} &
@@ -598,7 +598,7 @@ scripts:
           with:
             pid: ${{JVM_PID}}
             log_dir: ${{REPO_DIR}}/logs
-            runtime_name: ${{RUNTIMECMD.name}}
+            runtime_name: ${{RUNTIME_NAME}}
             iteration: ${{ITERATION}}
         - log: JVM_PID = ${{JVM_PID}}
         - read-state: ${{config.profiler.name}}
@@ -609,7 +609,7 @@ scripts:
                 - script: async-profiler-configure
                 - set-state:
                     key: PROFILER_LOGFILE
-                    value: "${{RUNTIMECMD.name}}-${{ITERATION}}.${{= '${{config.profiler.name}}' == 'jfr' ? 'jfr' : 'html' }}"
+                    value: "${{RUNTIME_NAME}}-${{ITERATION}}.${{= '${{config.profiler.name}}' == 'jfr' ? 'jfr' : 'html' }}"
                 - script:
                     name: async-profiler-run
                     async: true
@@ -638,7 +638,8 @@ scripts:
                 -o ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}} \
                 ${{SCRIPTS_DIR}}/app-load-test.hf.yml 2>&1 >${{REPO_DIR}}/logs/hf-${{RUNTIME_NAME}}-${{ITERATION}}.log &
         - sh: HF_PID=$! && echo $HF_PID
-        - set-state: HF_PID
+          then:
+            - set-state: HF_PID
         - script:
             name: monitor-process
             async: true
@@ -661,28 +662,28 @@ scripts:
               then:
                 - set-state: START_TIME
               else:
-                - abort: Unable to find startTime in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME.name}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
+                - abort: Unable to find startTime in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
         - read-state: ${{HF_OUTPUT}}
           then:
             - json: $.info.terminateTime
               then:
                 - set-state: TERMINATE_TIME
               else:
-                - abort: Unable to find terminateTime in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME.name}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
+                - abort: Unable to find terminateTime in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
         - read-state: ${{HF_OUTPUT}}
           then:
             - json: $.stats[?(@.phase == 'loadTest')].total.summary
               then:
                 - set-state: SUMMARY
               else:
-                - abort: Unable to find summary in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME.name}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
+                - abort: Unable to find summary in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
         - read-state: ${{SUMMARY}}
           then:
             - json: $.requestCount
               then:
                 - set-state: REQUEST_COUNT
               else:
-                - abort: Unable to find request count in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME.name}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
+                - abort: Unable to find request count in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
         - read-state: ${{SUMMARY}}
           then:
             - json: $.connectionErrors
@@ -702,15 +703,15 @@ scripts:
             value: ${{= ${{REQUEST_COUNT}}/((${{TERMINATE_TIME}}-${{START_TIME}})/1000) }}
         - script: state-array-push
           with:
-            array: RUN.output.results.${{RUNTIME.name}}.load.throughput
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.throughput
             value: ${{THROUGHPUT}}
         - script: state-array-push
           with:
-            array: RUN.output.results.${{RUNTIMECMD.name}}.load.connectionErrors
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.connectionErrors
             value: ${{CONNECTION_ERRORS}}
         - script: state-array-push
           with:
-            array: RUN.output.results.${{RUNTIMECMD.name}}.load.requestTimeouts
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.requestTimeouts
             value: ${{REQUEST_TIMEOUTS}}
 
         - sh: pmap -x $PID | grep total | awk '{print $4}'
@@ -718,11 +719,11 @@ scripts:
             - set-state: RSS
         - script: state-array-push
           with:
-            array: RUN.output.results.${{RUNTIMECMD.name}}.load.rss
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.rss
             value: ${{= ${{RSS}}/1024 }}
         - script: state-array-push
           with:
-            array: RUN.output.results.${{RUNTIMECMD.name}}.load.throughputDensity
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.throughputDensity
             value: ${{= ${{THROUGHPUT}}/${{RSS}}*1024 }}
         - signal: LOAD_TEST_COMPLETE
         - sh: kill -15 $PID
@@ -731,24 +732,24 @@ scripts:
         - script: stop-test-services
     - script: state-array-calc-avg
       with:
-        var-name: RUN.output.results.${{RUNTIMECMD.name}}.load.avThroughput
-        array: RUN.output.results.${{RUNTIMECMD.name}}.load.throughput
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avThroughput
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.throughput
     - script: state-array-calc-avg
       with:
-        var-name: RUN.output.results.${{RUNTIMECMD.name}}.load.avMaxRss
-        array: RUN.output.results.${{RUNTIMECMD.name}}.load.rss
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avMaxRss
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.rss
     - script: state-array-calc-max
       with:
-        var-name: RUN.output.results.${{RUNTIMECMD.name}}.load.maxThroughputDensity
-        array: RUN.output.results.${{RUNTIMECMD.name}}.load.throughputDensity
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.maxThroughputDensity
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.throughputDensity
     - script: state-array-calc-avg
       with:
-        var-name: RUN.output.results.${{RUNTIMECMD.name}}.load.avConnectionErrors
-        array: RUN.output.results.${{RUNTIMECMD.name}}.load.connectionErrors
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avConnectionErrors
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.connectionErrors
     - script: state-array-calc-avg
       with:
-        var-name: RUN.output.results.${{RUNTIMECMD.name}}.load.avRequestTimeouts
-        array: RUN.output.results.${{RUNTIMECMD.name}}.load.requestTimeouts
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avRequestTimeouts
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.requestTimeouts
 
   watch-log:
     - sh: tail -f ${{log_file}}
