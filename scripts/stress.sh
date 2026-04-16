@@ -57,14 +57,14 @@ done
 TTFR=$((($(_date) - ts)/1000000))
 RSS=`ps -o rss= -p $CURRENT_PID | sed 's/^ *//g'`
 
-jbang run@hyperfoil -PLOAD_DURATION=20s -PWARMUP_DURATION=0s -PWARMUP_PAUSE_DURATION=0s ${thisdir}/perf-lab/load-tests/load-test-fixed-threads-read-all.hf.yml &> hf.log
+tempdir=$(mktemp -d)
+jbang run@hyperfoil -o $tempdir -PLOAD_DURATION=20s -PWARMUP_DURATION=0s -PWARMUP_PAUSE_DURATION=0s ${thisdir}/perf-lab/load-tests/load-test-fixed-threads-read-all.hf.yml &> ${tempdir}/hf.log
 
-${thisdir}/infra.sh -d
 kill $(lsof -t -i:8080) &>/dev/null
+${thisdir}/infra.sh -d
 
 echo "-------------------------------------------------"
 printf "Time to first request: %.3f sec\n" $(echo "$TTFR / 1000" | bc -l)
 printf "RSS (after 1st request): %.1f MB\n" $(echo "$RSS / 1024" | bc -l)
 echo "-------------------------------------------------"
-cat hf.log
-rm hf.log
+cat ${tempdir}/hf.log
