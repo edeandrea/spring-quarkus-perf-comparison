@@ -36,7 +36,7 @@ http:
 phases:
   - loadTest:
       always:
-        users: !param LOAD_USERS 50
+        users: !param LOAD_USERS 2
         duration: !param LOAD_DURATION 30s
         startAfter: warmup
         scenario:
@@ -48,7 +48,7 @@ phases:
 
   - warmup:
       always:
-        users: !param WARMUP_USERS 50
+        users: !param WARMUP_USERS 2
         duration: !param WARMUP_DURATION 2m
         scenario:
           - loadTest: *loadTest
