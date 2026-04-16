@@ -2,9 +2,10 @@
 # Hyperfoil Load Test Configuration
 # =============================================================================
 #
-# This configuration file defines a load test scenario for the application
-# endpoint. It includes a warmup phase followed by a main load test phase,
-# both targeting the same HTTP endpoint.
+# This configuration file defines a load test scenario for the application's read-all
+# endpoint. It includes a warmup phase followed by a delay, then the main load test phase.
+#
+# All phases target the same HTTP endpoint.
 #
 # Configurable Parameters:
 # ----------------------------------
@@ -25,7 +26,7 @@
 # Usage:
 # ------
 # Override parameters using: -P PARAM_NAME=value
-# Example: jbang run@hyperfoil -PHOST=example.com -PPORT=443 -PPROTOCOL=https app-load-test.hf.yml
+# Example: jbang run@hyperfoil -PHOST=example.com -PPORT=443 -PPROTOCOL=https load-test-fixed-threads-read-all.hf.yml
 #
 # =============================================================================
 
