@@ -15,8 +15,8 @@
     <maven.compiler.release>21</maven.compiler.release>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.31.4</quarkus.platform.version>
-    <surefire-plugin.version>3.5.4</surefire-plugin.version>
+    <quarkus.platform.version>3.34.3</quarkus.platform.version>
+    <surefire-plugin.version>3.5.5</surefire-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -52,11 +52,20 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-micrometer-opentelemetry</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-container-image-jib</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-observability-devservices-lgtm</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -102,7 +111,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
         <configuration>
-	        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+	        <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
           <systemPropertyVariables>
             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
             <maven.home>${maven.home}</maven.home>
@@ -119,7 +128,7 @@
               <goal>verify</goal>
             </goals>
             <configuration>
-	            <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+	            <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
               <systemPropertyVariables>
                 <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>

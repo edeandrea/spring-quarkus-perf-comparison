@@ -33,10 +33,10 @@ To that end, we use different branches within this repository for separating the
 > [!IMPORTANT]
 > While the strategies and outcomes may be different, each strategy should still represent the same set of [guiding principles](#guiding-principles-) when comparing applications within the strategy.
 
-| Strategy              | Goals                                                                                                                                                                                        | Constraints                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Branch                                                                                                  |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| OOTB (Out of the box) | - Simplicity<br/>- Measure performance characteristics each framework provides out of the box<br/>&nbsp;&nbsp;&nbsp;&nbsp;- Does one framework provide a more "production ready" experience? | - No tuning allowed, even to fix load-related errors<br/>&nbsp;&nbsp;&nbsp;&nbsp;- Since there's no tuning, pool sizes might be different between Quarkus and Spring applications (or even between Spring 3 and Spring 4)                                                                                                                                                                                                                                         | [`ootb`](https://github.com/quarkusio/spring-quarkus-perf-comparison/blob/ootb)                         |
-| Tuned                 | Performance                                                                                                                                                                                  | Reasonable improvements to help improve performance without changing the architecture of the application<br/>- Code and architectural equivalence are still important<br/><br/>**Acceptable**<br/>- Adjustments to HTTP/database thread/connection pool sizes<br/>- Removal of the [open session in view pattern](https://www.baeldung.com/spring-open-session-in-view)<br/><br/>**Unacceptable**<br/>- Changes specific to a fixed number of CPU cores or memory | [`main`](https://github.com/quarkusio/spring-quarkus-perf-comparison)<br/>The default repository branch |
+| Strategy              | Goals                                                                                                                                                                                        | Constraints                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Branch                                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| OOTB (Out of the box) | - Simplicity<br/>- Measure performance characteristics each framework provides out of the box<br/>&nbsp;&nbsp;&nbsp;&nbsp;- Does one framework provide a more "production ready" experience? | - No tuning allowed, even to fix load-related errors<br/>&nbsp;&nbsp;&nbsp;&nbsp;- Since there's no tuning, pool sizes might be different between Quarkus and Spring applications (or even between Spring 3 and Spring 4)                                                                                                                                                                                                                                                                               | [`ootb`](https://github.com/quarkusio/spring-quarkus-perf-comparison/blob/ootb)                         |
+| Tuned                 | Performance                                                                                                                                                                                  | Reasonable improvements to help improve performance without changing the architecture of the application<br/>- Code and architectural equivalence are still important<br/>- Metrics and OpenTelemetry stack<br/><br/>**Acceptable**<br/>- Adjustments to HTTP/database thread/connection pool sizes<br/>- Removal of the [open session in view pattern](https://www.baeldung.com/spring-open-session-in-view)<br/><br/>**Unacceptable**<br/>- Changes specific to a fixed number of CPU cores or memory | [`main`](https://github.com/quarkusio/spring-quarkus-perf-comparison)<br/>The default repository branch |
 
 ## What's in the repo
 This project contains the following modules:
@@ -166,7 +166,28 @@ AVG time to first request: 0.150 sec
 
 ### Acceptable: Run on a single machine, with solid automation and detailed output
 
-These scripts are being developed.
+These scripts are being developed, but in the mean time if you are on a Linux machine with at least 12 cores you can use the [scripts used in Red Hat/IBM performance labs](https://github.com/quarkusio/spring-quarkus-perf-comparison/tree/main/scripts/perf-lab).
+To achieve this you need to pass `--host LOCAL` to the `./run-benchmarks.sh` script.
+For instance, from the `scripts/perf-lab/` directory:
+
+```shell
+./run-benchmarks.sh \
+  --host LOCAL \
+  --drop-fs-caches \
+  --runtimes quarkus3-jvm,quarkus3-virtual \
+  --quarkus-version "3.32.2" \
+  --output-dir ./results \
+  --tests measure-time-to-first-request
+```
+
+> [!NOTE]
+> `qDup`, which is used by these scripts, officially only supports the `bash` shell, so your mileage may vary if you are using a different shell.
+
+To explore all available options (including the full list of runtimes and tests), run:
+
+```shell
+./run-benchmarks.sh --help
+```
 
 To produce charts from the output, you can use the scripts at https://github.com/quarkusio/benchmarks.
 
@@ -207,4 +228,50 @@ The results are published to https://github.com/quarkusio/benchmarks/tree/main/r
 - Why Quarkus is Fast: https://quarkus.io/performance/
 - How the Quarkus team measure performance (and some anti-patterns to be aware of): https://quarkus.io/guides/performance-measure
 
+# Running `run-benchmarks.sh` directly on Bare Metal
 
+You can run the benchmark directly on a bare metal machine without the Jenkins infrastructure, which is useful for 
+local development and testing.
+
+## Prerequisites
+- Linux system with at least 14 real physical cores
+
+## Configure Passwordless sudo for Required Commands
+Some commands require sudo privileges. `qDup` expects these commands to run without password prompts. To configure this, 
+either create a user called `jenkins` or adapt the following instructions for your existing user.
+
+Execute: `sudo visudo`
+```text
+jenkins ALL=(root) NOPASSWD: /usr/bin/tee /proc/sys/vm/drop_caches
+jenkins ALL=(root) NOPASSWD: /usr/bin/tee /proc/sys/kernel/perf_event_paranoid
+jenkins ALL=(root) NOPASSWD: /usr/bin/tee /proc/sys/kernel/kptr_restrict
+```
+
+## Running a Benchmark Example
+
+The following example demonstrates how to run a benchmark with specific parameters. Adapt these values to match 
+your environment:
+
+```bash
+cd scripts/perf-lab
+BRANCH=main
+REPO=https://github.com/quarkusio/spring-quarkus-perf-comparison.git
+QDUP_USER=jenkins
+./run-benchmarks.sh --repo-branch $BRANCH --scenario tuned --output-dir run --graalvm-version 25.0.2-graalce \
+  --host 127.0.0.1 --iterations 1 --java-version 25.0.2-tem --repo-url $REPO --profiler none \
+  --quarkus-version 3.34.1 --springboot3-version 3.5.13 --springboot4-version 4.0.5 --user $QDUP_USER \
+  --wait-time 30 --run-identifier local-1 --drop-fs-caches \
+  --jvm-args "-XX:+UseNUMA -Dserver.tomcat.threads.max=50 -Dserver.tomcat.threads.min-spare=50" \
+  --description "Local Test" --cpus-app 0,1,2,3 --cpus-db 4,5,6 --cpus-first-request 7 --cpus-load-gen 7,8,9 \
+  --cpus-monitoring 16 --cpus-otel 10,11,12 --jvm-memory "-Xmx512m -Xms512m" --runtimes quarkus3-jvm,spring4-jvm \
+  --tests run-load-test
+```
+
+### Important Configuration Notes
+
+- **CPU Allocation**: Adjust all `--cpus-*` parameters to match your system's available cores.
+- **Memory Settings**: The `--jvm-memory` parameter sets both min and max heap to 512MB.
+- **Versions**: Update `--graalvm-version`, `--java-version`, `--quarkus-version`, and Spring Boot versions to match 
+your desired test configuration.
+- **REPO**: For local development, point `REPO` to your local repository path. When using a local path, the `BRANCH` 
+parameter is ignored.

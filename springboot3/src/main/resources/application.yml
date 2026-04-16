@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: springboot3
   datasource:
     username: fruits
     password: fruits
@@ -6,7 +8,7 @@ spring:
     hikari:
       # @simasch: Sets the jdbc pool size to be the same that Quarkus uses
       # see https://github.com/quarkusio/spring-quarkus-perf-comparison/pull/114
-      maximum-pool-size: 20
+      maximum-pool-size: 50
   jackson:
     default-property-inclusion: non_empty
   jpa:
@@ -26,6 +28,20 @@ spring:
         # @simasch: Sets the hibernate batch size to be the same that Quarkus uses
         # see https://github.com/quarkusio/spring-quarkus-perf-comparison/pull/114
         default_batch_fetch_size: 16
+
+otel:
+  traces:
+    "sampler": traceidratio
+    "sampler.arg": 0.1
+
+# Turn on prometheus actuator endpoint
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - prometheus
 
 # In order to remove errors and allow the Spring application to handle the load without errors
 # See https://github.com/quarkusio/spring-quarkus-perf-comparison/issues/60#issuecomment-3724614394
