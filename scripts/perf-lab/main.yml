@@ -646,7 +646,7 @@ scripts:
             name: pidstat
             command: pidstat -u -w -t -p ${{HF_PID}} 1
             log_file: ${{REPO_DIR}}/logs/pidstat-hf-${{RUNTIME_NAME}}-${{ITERATION}}.log
-        - wait: ${{HF_PID}}
+        - sh: wait ${{HF_PID}}
         - sh: cat ${{REPO_DIR}}/logs/hf-${{RUNTIME_NAME}}-${{ITERATION}}.log | grep "Started run" | awk '{print $3}'
           then:
             - set-state:
