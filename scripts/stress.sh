@@ -62,7 +62,7 @@ printf "Time to first request: %.3f sec\n" $(echo "$TTFR / 1000" | bc -l)
 printf "RSS (after 1st request): %.1f MB\n" $(echo "$RSS / 1024" | bc -l)
 echo "-------------------------------------------------"
 
-jbang wrk@hyperfoil -t2 -c100 -d20s --timeout 1s --latency http://localhost:8080/fruits
+jbang run@hyperfoil -PLOAD_DURATION=20s -PWARMUP_DURATION=0s -PWARMUP_PAUSE_DURATION=0s perf-lab/load-tests/load-test-fixed-threads-read-all.hf.yml
 
 ${thisdir}/infra.sh -d
 kill $(lsof -t -i:8080) &>/dev/null
