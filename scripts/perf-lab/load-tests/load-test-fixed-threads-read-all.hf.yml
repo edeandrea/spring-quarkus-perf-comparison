@@ -7,21 +7,32 @@
 #
 # All phases target the same HTTP endpoint.
 #
+# This is to replace how we did things exactly as before:
+# warmup
+# wrk -t 2 -c 100 -d 2m --timeout 2m http://localhost:8080/fruits
+#
+# cooldown
+# sleep 30s
+#
+# loadTest
+# wrk -t 2 -c 100 -d 30s --timeout 30s http://localhost:8080/fruits
+#
 # Configurable Parameters:
 # ----------------------------------
 # PROTOCOL               - HTTP protocol to use (default: http)
-#                          Options: http, https
+#                           Options: http, https
 # HOST                   - Target server hostname (default: localhost)
 # PORT                   - Target server port (default: 8080)
-# SHARED_CONNECTIONS     - Number of shared HTTP connections in the pool (default: 100)
+# CONNECTIONS            - Number of HTTP connections (-c wrk param) (default: 100)
 # PATH                   - HTTP endpoint path to test (default: /fruits)
-# WARMUP_USERS           - Number of concurrent users during warmup phase (default: 2)
-# WARMUP_DURATION        - Duration of the warmup phase (default: 2m)
+# WARMUP_DURATION        - Duration of the warmup phase (-d wrk param) (default: 2m)
+# WARMUP_MAX_DURATION    - Maximum duration of the warmup phase (default: 4m)
 # WARMUP_PAUSE_DURATION  - Duration of the pause between warmup and main load test (default: 30s)
-# WARMUP_REQUEST_TIMEOUT - Timeout for warmup requests (default: 2m)
-# LOAD_REQUEST_TIMEOUT   - Timeout for main load test requests (default: 30s)
-# LOAD_USERS             - Number of concurrent users during main load test (default: 2)
-# LOAD_DURATION          - Duration of the main load test phase (default: 30s)
+# WARMUP_REQUEST_TIMEOUT - Timeout for warmup requests (--timeout wrk param) (default: 2m)
+# LOAD_REQUEST_TIMEOUT   - Timeout for main load test requests (--timeout wrk param) (default: 30s)
+# LOAD_DURATION          - Duration of the main load test phase (-d wrk param) (default: 30s)
+# LOAD_MAX_DURATION      - Maximum duration of the main load test phase (default: 1m)
+# THREADS                - Number of threads to use (-t wrk param) (default: 2)
 #
 # Usage:
 # ------
@@ -31,41 +42,69 @@
 # =============================================================================
 
 name: load-test-fixed-threads-read-all
+threads: !param THREADS 2
 http:
   - protocol: !param PROTOCOL http
     host: !param HOST localhost
     port: !param PORT 8080
-    sharedConnections: !param SHARED_CONNECTIONS 100
+    sharedConnections: !param CONNECTIONS 100
+    allowHttp2: false
+ergonomics:
+  repeatCookies: false
+  userAgentFromSession: false
 
 phases:
-  - loadTest:
-      always:
-        users: !param LOAD_USERS 2
-        duration: !param LOAD_DURATION 30s
-        startAfterStrict:
-          - warmup
-          - cooldown
-        scenario:
-          - constantLoad:
-              - httpRequest:
-                  GET: !param PATH /fruits
-                  timeout: !param LOAD_REQUEST_TIMEOUT 30s
-                  headers:
-                    accept: application/json
-
   - warmup:
       always:
-        users: !param WARMUP_USERS 2
+        users: !param CONNECTIONS 100
         duration: !param WARMUP_DURATION 2m
+        maxDuration: !param WARMUP_MAX_DURATION 4m
+        isWarmup: true
         scenario:
-          - warmupLoad:
-              - httpRequest:
-                  GET: !param PATH /fruits
-                  timeout: !param WARMUP_REQUEST_TIMEOUT 2m
-                  headers:
-                    accept: application/json
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getAllFruits:
+                - httpRequest:
+                      GET: !param PATH /fruits
+                      timeout: !param WARMUP_REQUEST_TIMEOUT 2m
+                      headers:
+                        accept: application/json
 
   - cooldown:
       noop:
         startAfter: warmup
         duration: !param WARMUP_PAUSE_DURATION 30s
+
+  - logStart:
+      atOnce:
+        users: 1
+        startAfterStrict:
+          - warmup
+          - cooldown
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - log:
+                - timestamp:
+                    toVar: now
+                    pattern: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+                - log: "loadTest started at ${now}"
+
+  - loadTest:
+      always:
+        users: !param CONNECTIONS 100
+        duration: !param LOAD_DURATION 30s
+        maxDuration: !param LOAD_MAX_DURATION 1m
+        startAfterStrict: logStart
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getAllFruits:
+                - httpRequest:
+                      GET: !param PATH /fruits
+                      timeout: !param LOAD_REQUEST_TIMEOUT 30s
+                      headers:
+                        accept: application/json
