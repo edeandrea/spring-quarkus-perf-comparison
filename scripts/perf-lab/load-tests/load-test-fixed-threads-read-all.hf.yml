@@ -49,6 +49,7 @@ http:
     port: !param PORT 8080
     sharedConnections: !param CONNECTIONS 100
     allowHttp2: false
+    useHttpCache: false
 ergonomics:
   repeatCookies: false
   userAgentFromSession: false
