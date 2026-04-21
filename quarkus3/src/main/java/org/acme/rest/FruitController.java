@@ -1,6 +1,7 @@
 package org.acme.rest;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -19,6 +20,7 @@ import org.acme.service.FruitService;
 @Path("/fruits")
 public class FruitController {
 	private final FruitService fruitService;
+  private final AtomicInteger counter = new AtomicInteger(0);
 
 	public FruitController(FruitService fruitService) {
 		this.fruitService = fruitService;
@@ -27,6 +29,10 @@ public class FruitController {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<FruitDTO> getAll() {
+    if (this.counter.incrementAndGet() > 1000) {
+      throw new RuntimeException("boom!");
+    }
+
 		return this.fruitService.getAllFruits();
 	}
 

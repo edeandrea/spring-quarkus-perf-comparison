@@ -683,6 +683,21 @@ scripts:
                     - set-state: REQUEST_TIMEOUTS
                   else:
                     - set-state: REQUEST_TIMEOUTS 0
+                - json: $.invalid
+                  then:
+                    - set-state: TOTAL_APP_ERRORS
+                  else:
+                    - set-state: TOTAL_APP_ERRORS 0
+                - json: $.extensions.http.status_4xx
+                  then:
+                    - set_state: APP_4XX_ERRORS
+                  else:
+                    - set-state: APP_4XX_ERRORS 0
+                - json: $.extensions.http.status_5xx
+                  then:
+                    - set_state: APP_5XX_ERRORS
+                  else:
+                    - set-state: APP_5XX_ERRORS 0
               else:
                 - abort: Unable to find summary in ${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}}/run/${{RUN_NUM}}/all.json
         - set-state:
@@ -700,6 +715,18 @@ scripts:
           with:
             array: RUN.output.results.${{RUNTIME_NAME}}.load.requestTimeouts
             value: ${{REQUEST_TIMEOUTS}}
+        - script: state-array-push
+          with:
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.appErrors
+            value: ${{TOTAL_APP_ERRORS}}
+        - script: state-array-push
+          with:
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.app4xxErrors
+            value: ${{APP_4XX_ERRORS}}
+        - script: state-array-push
+          with:
+            array: RUN.output.results.${{RUNTIME_NAME}}.load.app5xxErrors
+            value: ${{APP_5XX_ERRORS}}
 
         - sh: pmap -x $PID | grep total | awk '{print $4}'
           then:
@@ -737,6 +764,18 @@ scripts:
       with:
         var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avRequestTimeouts
         array: RUN.output.results.${{RUNTIME_NAME}}.load.requestTimeouts
+    - script: state-array-calc-avg
+      with:
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avAppErrors
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.appErrors
+    - script: state-array-calc-avg
+      with:
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avApp4xxErrors
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.app4xxErrors
+    - script: state-array-calc-avg
+      with:
+        var-name: RUN.output.results.${{RUNTIME_NAME}}.load.avApp5xxErrors
+        array: RUN.output.results.${{RUNTIME_NAME}}.load.app5xxErrors
 
   watch-log:
     - sh: tail -f ${{log_file}}
