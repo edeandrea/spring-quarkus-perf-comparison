@@ -632,7 +632,7 @@ scripts:
         - sh: |
             ${{LOAD_GEN_CMD_PREFIX}} jbang \
               -Dio.hyperfoil.rootdir=${{HYPERFOIL_LOGS_DIR}}/${{RUNTIME_NAME}}-${{ITERATION}} \
-              -Dio.hyperfoil.core.util.watchdog.CPU_WATCHDOG_IDLE_THRESHOLD=0.0 \
+              -Dio.hyperfoil.core.util.watchdog.idle.threshold=0.0 \
               -R \
               -XX:+UseNUMA \
               run@hyperfoil \

@@ -61,7 +61,7 @@ tempdir=$(mktemp -d)
 
 jbang \
   -Dio.hyperfoil.rootdir=${tempdir} \
-  -Dio.hyperfoil.core.util.watchdog.CPU_WATCHDOG_IDLE_THRESHOLD=0.0 \
+  -Dio.hyperfoil.core.util.watchdog.idle.threshold=0.0 \
   run@hyperfoil \
     -o ${tempdir} \
     -PLOAD_DURATION=20s \
