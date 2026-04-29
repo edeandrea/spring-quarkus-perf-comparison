@@ -24,6 +24,7 @@
 # HOST                   - Target server hostname (default: localhost)
 # PORT                   - Target server port (default: 8080)
 # CONNECTIONS            - Number of HTTP connections (-c wrk param) (default: 100)
+# HIDE_WARMUP_PHASE      - Hide the warmup phase details (default: false)
 # PATH                   - HTTP endpoint path to test (default: /fruits)
 # WARMUP_DURATION        - Duration of the warmup phase (-d wrk param) (default: 2m)
 # WARMUP_MAX_DURATION    - Maximum duration of the warmup phase (default: 4m)
@@ -60,7 +61,7 @@ phases:
         users: !param CONNECTIONS 100
         duration: !param WARMUP_DURATION 2m
         maxDuration: !param WARMUP_MAX_DURATION 4m
-        isWarmup: true
+        isWarmup: !param HIDE_WARMUP_PHASE false
         scenario:
           maxRequests: 1
           maxSequences: 1
